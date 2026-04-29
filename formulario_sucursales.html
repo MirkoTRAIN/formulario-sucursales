@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Sucursales</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f2f0;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .wrapper { width: 100%; max-width: 1300px; margin: 0 auto; }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .header-icon {
+    width: 42px; height: 42px;
+    background: #1a6640;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header-icon svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2; }
+
+  .header-text h1 { font-size: 20px; font-weight: 600; color: #111; letter-spacing: -0.3px; }
+  .header-text p  { font-size: 13px; color: #666; margin-top: 1px; }
+
+  .sheet {
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+  }
+
+  .toolbar {
+    background: #f2f2f2;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .d1{background:#ff5f57;} .d2{background:#febc2e;} .d3{background:#28c840;}
+  .toolbar-name { margin-left: 10px; font-family: 'DM Mono', monospace; font-size: 11px; color: #666; }
+
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 960px;
+  }
+
+  .corner {
+    background: #f2f2f2;
+    border-right: 1px solid #c8c8c8;
+    border-bottom: 2px solid #1a6640;
+    width: 40px; min-width: 40px;
+  }
+
+  th.col-alpha {
+    background: #f2f2f2;
+    border-right: 1px solid #d0d0d0;
+    border-bottom: 1px solid #d0d0d0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: #1a6640;
+    text-align: center;
+    padding: 5px 4px;
+    user-select: none;
+  }
+
+  tr.q-row th.q-cell {
+    background: #eaf3e8;
+    border-right: 1px solid #c8ddc5;
+    border-bottom: 2px solid #1a6640;
+    padding: 8px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1a5535;
+    text-align: left;
+    line-height: 1.4;
+    vertical-align: bottom;
+    min-width: 160px;
+    max-width: 200px;
+    word-break: break-word;
+  }
+
+  td.row-num {
+    background: #f2f2f2;
+    border-right: 1px solid #c8c8c8;
+    border-bottom: 1px solid #e8e8e8;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    padding: 0 4px;
+    user-select: none;
+    width: 40px; min-width: 40px;
+  }
+
+  td.input-cell {
+    border-right: 1px solid #e8e8e8;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 0;
+    height: 36px;
+  }
+
+  td.input-cell input,
+  td.input-cell select {
+    width: 100%;
+    height: 36px;
+    border: none;
+    outline: none;
+    padding: 0 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #1a3a2a;
+    background: white;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  td.input-cell select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 22px;
+    cursor: pointer;
+    color: #aaa;
+  }
+  td.input-cell select.filled { color: #1a3a2a; }
+
+  td.input-cell input:focus,
+  td.input-cell select:focus {
+    background: #f0f8f0;
+    box-shadow: inset 0 0 0 2px #1a6640;
+    position: relative;
+    z-index: 1;
+  }
+
+  td.input-cell input::placeholder { color: #ccc; }
+
+  td.radio-cell {
+    border-right: 1px solid #e8e8e8;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 0 8px;
+    height: 36px;
+    min-width: 160px;
+  }
+
+  .radio-wrap { display: flex; gap: 14px; align-items: center; height: 100%; }
+  .radio-opt { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .radio-opt input[type="radio"] { width: 14px; height: 14px; accent-color: #1a6640; cursor: pointer; }
+  .radio-opt span { font-family: 'DM Mono', monospace; font-size: 12px; color: #1a3a2a; }
+
+  td.input-cell.error input,
+  td.input-cell.error select { box-shadow: inset 0 0 0 2px #e03333 !important; background: #fff5f5; }
+  td.radio-cell.error { box-shadow: inset 0 0 0 2px #e03333; }
+
+  .add-row-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-top: 1px solid #e8e8e8;
+    background: #fafafa;
+  }
+
+  .btn-add {
+    display: flex; align-items: center; gap: 6px;
+    background: none;
+    border: 1px dashed #bbb;
+    border-radius: 4px;
+    padding: 5px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-add:hover { border-color: #1a6640; color: #1a6640; background: #f0f8f0; }
+  .btn-add svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+  .footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 1px solid #d0d0d0;
+    background: #f8f8f8;
+  }
+
+  .formula-bar { font-family: 'DM Mono', monospace; font-size: 11px; color: #999; }
+  .formula-bar span { color: #1a6640; }
+
+  .footer-actions { display: flex; gap: 10px; align-items: center; }
+  .row-count { font-size: 12px; color: #888; font-family: 'DM Mono', monospace; }
+
+  .btn-submit {
+    background: #1a6640; color: white; border: none;
+    padding: 8px 22px; border-radius: 4px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-submit:hover { background: #155535; }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled { background: #7aaa90; cursor: not-allowed; }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    align-items: center; justify-content: center; z-index: 200;
+  }
+  .overlay.show { display: flex; }
+
+  .success-box {
+    background: white; border-radius: 10px;
+    padding: 2rem 2.5rem; text-align: center;
+    max-width: 360px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .success-icon {
+    width: 52px; height: 52px; background: #eaf3e8; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+  }
+  .success-icon svg { width: 26px; height: 26px; stroke: #1a6640; fill: none; stroke-width: 2.5; }
+  .success-box h2 { font-size: 17px; font-weight: 600; color: #111; margin-bottom: 6px; }
+  .success-box p { font-size: 13px; color: #666; margin-bottom: 1.5rem; line-height: 1.5; }
+  .success-box a { display: inline-block; font-size: 12px; color: #1a6640; margin-bottom: 1.25rem; text-decoration: none; }
+  .success-box a:hover { text-decoration: underline; }
+  .btn-nueva {
+    background: #1a6640; color: white; border: none;
+    padding: 9px 20px; border-radius: 4px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;
+    display: block; width: 100%;
+  }
+
+  .error-toast {
+    display: none;
+    background: #fff0f0; border: 1px solid #f5c5c5;
+    border-radius: 6px; padding: 10px 14px;
+    font-size: 13px; color: #c0392b;
+    margin-top: 8px; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Registro de Sucursales · Control de Accesos</h1>
+      <p>Rellena una fila por cada sucursal. Puedes añadir todas las que necesites.</p>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="toolbar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="toolbar-name">registro_sucursales.xlsx</span>
+    </div>
+
+    <div class="table-scroll">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th class="corner"></th>
+            <th class="col-alpha">A</th>
+            <th class="col-alpha">B</th>
+            <th class="col-alpha">C</th>
+            <th class="col-alpha">D</th>
+            <th class="col-alpha">E</th>
+            <th class="col-alpha">F</th>
+          </tr>
+          <tr class="q-row">
+            <th class="corner"></th>
+            <th class="q-cell">Nombre de la sucursal</th>
+            <th class="q-cell">Clientes ACTIVOS</th>
+            <th class="q-cell">Nº de TORNOS de control de accesos</th>
+            <th class="q-cell">¿El torno controla entrada y salida?</th>
+            <th class="q-cell">Nº de SALAS DE ACTIVIDADES</th>
+            <th class="q-cell">Notas / Observaciones</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="add-row-bar">
+      <button class="btn-add" onclick="addRow()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Añadir sucursal
+      </button>
+    </div>
+
+    <div class="footer-bar">
+      <div class="formula-bar">fx &nbsp;<span id="formulaText">=REGISTRO(A2:F2)</span></div>
+      <div class="footer-actions">
+        <span class="row-count" id="rowCount">1 sucursal</span>
+        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+          <span id="btnLabel">Enviar registros →</span>
+          <div class="spinner" id="spinner"></div>
+        </button>
+      </div>
+    </div>
+    <div class="error-toast" id="errorToast">No se pudo conectar con Google Sheets. Revisa tu conexión e inténtalo de nuevo.</div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="success-box">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <h2>¡Registros guardados!</h2>
+    <p id="successMsg">Los datos se han enviado a Google Sheets correctamente.</p>
+    <button class="btn-nueva" onclick="resetAll()">Registrar más sucursales</button>
+  </div>
+</div>
+
+<script>
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1QiO9w3GtcmbP89VsLIjoRX8Y-w4wrKLhzbhpnf83rYuLLL4KYMS4qeCLKQKjZ0hW1A/exec';
+  var rowCount = 0;
+
+  function addRow() {
+    rowCount++;
+    var n = rowCount;
+    var tbody = document.getElementById('tableBody');
+    var tr = document.createElement('tr');
+    tr.id = 'row-' + n;
+    tr.innerHTML =
+      '<td class="row-num">' + n + '</td>' +
+
+      '<td class="input-cell" id="c1-' + n + '">' +
+        '<input type="text" placeholder="Nombre sucursal…" autocomplete="off" oninput="clearErr(\'c1-' + n + '\')">' +
+      '</td>' +
+
+      '<td class="input-cell" id="c2-' + n + '">' +
+        '<select onchange="this.classList.add(\'filled\'); clearErr(\'c2-' + n + '\')">' +
+          '<option value="" disabled selected>Seleccionar…</option>' +
+          '<option>De 0 a 50</option>' +
+          '<option>De 51 a 150</option>' +
+          '<option>De 151 a 300</option>' +
+          '<option>De 301 a 500</option>' +
+          '<option>De 501 a 1.000</option>' +
+          '<option>De 1.001 a 2.000</option>' +
+          '<option>Más de 2.000</option>' +
+        '</select>' +
+      '</td>' +
+
+      '<td class="input-cell" id="c3-' + n + '">' +
+        '<input type="number" min="0" placeholder="0" oninput="clearErr(\'c3-' + n + '\')">' +
+      '</td>' +
+
+      '<td class="radio-cell" id="c4-' + n + '">' +
+        '<div class="radio-wrap">' +
+          '<label class="radio-opt"><input type="radio" name="p4-' + n + '" value="Sí" onchange="clearErr(\'c4-' + n + '\')"><span>Sí</span></label>' +
+          '<label class="radio-opt"><input type="radio" name="p4-' + n + '" value="No" onchange="clearErr(\'c4-' + n + '\')"><span>No</span></label>' +
+        '</div>' +
+      '</td>' +
+
+      '<td class="input-cell" id="c5-' + n + '">' +
+        '<input type="number" min="0" placeholder="0" oninput="clearErr(\'c5-' + n + '\')">' +
+      '</td>' +
+
+      '<td class="input-cell">' +
+        '<input type="text" placeholder="Opcional…" autocomplete="off">' +
+      '</td>';
+
+    tbody.appendChild(tr);
+    updateUI();
+    tr.querySelector('input[type="text"]').focus();
+  }
+
+  function clearErr(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('error');
+  }
+
+  function updateUI() {
+    var label = rowCount === 1 ? '1 sucursal' : rowCount + ' sucursales';
+    document.getElementById('rowCount').textContent = label;
+    document.getElementById('formulaText').textContent = '=REGISTRO(A2:F' + (rowCount + 1) + ')';
+  }
+
+  function submitForm() {
+    if (rowCount === 0) { addRow(); return; }
+    var valid = true;
+    var records = [];
+
+    for (var i = 1; i <= rowCount; i++) {
+      var row = document.getElementById('row-' + i);
+      if (!row) continue;
+
+      var p1 = row.querySelector('#c1-' + i + ' input').value.trim();
+      var p2 = row.querySelector('#c2-' + i + ' select').value;
+      var p3 = row.querySelector('#c3-' + i + ' input').value;
+      var p4el = row.querySelector('input[name="p4-' + i + '"]:checked');
+      var p5 = row.querySelector('#c5-' + i + ' input').value;
+      var allTexts = row.querySelectorAll('td.input-cell input[type="text"]');
+      var p6 = allTexts.length > 1 ? allTexts[1].value.trim() : '';
+
+      var ok = true;
+      if (!p1) { document.getElementById('c1-' + i).classList.add('error'); ok = false; }
+      if (!p2) { document.getElementById('c2-' + i).classList.add('error'); ok = false; }
+      if (p3 === '' || isNaN(p3)) { document.getElementById('c3-' + i).classList.add('error'); ok = false; }
+      if (!p4el) { document.getElementById('c4-' + i).classList.add('error'); ok = false; }
+      if (p5 === '' || isNaN(p5)) { document.getElementById('c5-' + i).classList.add('error'); ok = false; }
+      if (!ok) { valid = false; continue; }
+
+      records.push({ sucursal: p1, clientes: p2, tornos: parseInt(p3), entradaSalida: p4el.value, salas: parseInt(p5), notas: p6 });
+    }
+
+    if (!valid) return;
+
+    // Sending state
+    var btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    document.getElementById('btnLabel').textContent = 'Enviando…';
+    document.getElementById('spinner').style.display = 'block';
+    document.getElementById('errorToast').style.display = 'none';
+
+    fetch(SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(records)), {
+      method: 'GET',
+      mode: 'no-cors'
+    })
+    .then(function() {
+      var n = records.length;
+      document.getElementById('successMsg').textContent =
+        'Se ' + (n === 1 ? 'ha guardado 1 sucursal' : 'han guardado ' + n + ' sucursales') + ' en Google Sheets correctamente.';
+      document.getElementById('overlay').classList.add('show');
+    })
+    .catch(function() {
+      document.getElementById('errorToast').style.display = 'block';
+    })
+    .finally(function() {
+      btn.disabled = false;
+      document.getElementById('btnLabel').textContent = 'Enviar registros →';
+      document.getElementById('spinner').style.display = 'none';
+    });
+  }
+
+  function resetAll() {
+    document.getElementById('tableBody').innerHTML = '';
+    rowCount = 0;
+    document.getElementById('overlay').classList.remove('show');
+    addRow();
+  }
+
+  addRow();
+</script>
+</body>
+</html>
